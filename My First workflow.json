@@ -1,0 +1,169 @@
+{
+  "name": "My First workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c095a912-f3b2-4441-bf7e-dfb19676fc35",
+      "name": "When chat message received",
+      "webhookId": "1422c2d5-9114-4b5c-b717-745570fdf63a"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "16c0c1cd-bdb2-41d0-af08-00a629e9a964",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        448,
+        256
+      ],
+      "id": "345e1985-fd48-4cdc-9df8-6a6c991c047d",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        304,
+        256
+      ],
+      "id": "29f47a0d-57b2-4a38-b254-9e34ad1e4afd",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": "llama3.2:3b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        144,
+        256
+      ],
+      "id": "0e4ac97d-b8cb-47dc-bcec-c06c3c980d86",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "d74CkRuN3VjwzYRi",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ahsanburki1819@gmail.com",
+        "subject": "this is your Result",
+        "emailType": "text",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        512,
+        0
+      ],
+      "id": "3c7c916f-4df6-4342-ab65-b285f0e79291",
+      "name": "Send a message",
+      "webhookId": "22b8e539-6b81-4cc8-b349-3cc7045ba691",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "f1RZMydCCpR8KdNH",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e8dab5f5-973f-4083-a66d-d00c5dba6c33",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1ecddca6e65f17cf0a20a3609013d903e3e8ab7215d7668d7489d35bc09562a5"
+  },
+  "nodeGroups": [],
+  "id": "YrtnjyZZS6OEFdiP",
+  "tags": []
+}
