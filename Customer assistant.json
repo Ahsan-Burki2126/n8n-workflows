@@ -1,0 +1,507 @@
+{
+  "name": "Customer assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Contact Us",
+        "formDescription": "Form Description ",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name ",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Message",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -208,
+        -16
+      ],
+      "id": "1f076a5a-a926-4b4c-8810-e730a6b9d892",
+      "name": "On form submission",
+      "webhookId": "8058b579-60bd-4c6f-854f-a68c5d374e69"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1PE4PuPPydpEVLVhfF28K3tHwq5rvITqbs4noobjPtdE",
+          "mode": "list",
+          "cachedResultName": "Customer Support",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PE4PuPPydpEVLVhfF28K3tHwq5rvITqbs4noobjPtdE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PE4PuPPydpEVLVhfF28K3tHwq5rvITqbs4noobjPtdE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name ": "={{ $json['Name '] }}",
+            "Email": "={{ $json.Email }}",
+            "Message": "={{ $json.Message }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name ",
+              "displayName": "Name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -16,
+        -16
+      ],
+      "id": "3d18508f-ba55-4a00-8c44-98f17af06a05",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JkL3w6JWtusBdf0C",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.Message }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Sales",
+              "description": "The person wants to buy something or learn about pricing, services, packages or availability. Examples: asking for a quote, asking what's included, asking if you can do a project."
+            },
+            {
+              "category": "Support",
+              "description": "The person has already bought or ordered something and needs help with it. Examples: tracking a parcel, late or missing delivery, damaged or wrong item, returns and refunds, a product or service not working as expected, changing or cancelling an existing order."
+            },
+            {
+              "category": "Other",
+              "description": "The message is not about buying something new and not about an existing order. Examples: compliments or general feedback, job applications, partnership or collaboration requests, spam or advertising, random questions unrelated to the business."
+            }
+          ]
+        },
+        "options": {
+          "enableAutoFixing": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        160,
+        -32
+      ],
+      "id": "c2c6b644-7910-44bc-a3e1-6a0daa736700",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        160,
+        192
+      ],
+      "id": "e59942ec-fe5e-4ce3-ac96-c4d7a0a8baf2",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "1zRRP4Jq0Eyf6MxB",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Customer name: {{ $json['Name '] }}\nCustomer message: {{ $json.Message }}\nWrite the reply email.",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a calm and caring customer support assistant for a small online business. Your job is to reply to existing customers who have a problem or question about an order, delivery, or product.  Rules: - Write 3 to 4 short sentences. -  Write only the main 2 sentences. Do not include a greeting or a sign-off.. - Acknowledge their specific problem and apologise for the trouble. - Never promise refunds, replacements, compensation, or delivery dates. - Say that the support team has received their message and will look into it and follow up soon. - End with a friendly sign-off from \"The Support Team\". - Write only the email body. No subject line, no placeholders like [Your Name]."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        592,
+        -16
+      ],
+      "id": "db57757f-8be4-4b4d-9797-05a858370717",
+      "name": "Support Reply"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Customer name: {{ $('Append row in sheet').item.json['Name '] }}\nCustomer message: {{ $('Append row in sheet').item.json.Message }}\n\nWrite the reply email.",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a friendly sales assistant for a small online business. Your job is to reply to potential customers who are interested in buying or want to know about prices, services, or packages.  Rules: - Write 3 to 4 short sentences. - Write only the main 2 sentences. Do not include a greeting or a sign-off. - Be warm and enthusiastic, and thank them for their interest. - Do not mention any specific prices, discounts, or delivery dates. - Say that a team member will contact them soon with full details..- Do not describe or list any products, services, packages, features, or prices. Only thank them for their interest and say a team member will be in touch with details. - End with a friendly sign-off from \"The Team\". - Write only the email body. No subject line, no placeholders like [Your Name]."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        592,
+        -320
+      ],
+      "id": "65198ec4-36c0-456a-a09b-e419852b7622",
+      "name": "Sales Reply"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Name: {{ $('Append row in sheet').item.json['Name '] }}\nMessage: {{ $('On form submission').item.json.Message }}\n\nWrite the reply, or NO_REPLY if it is spam.",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a polite assistant for a small online business. You reply to messages that are not about buying something and not about an existing order, such as compliments, feedback, job questions, or partnership requests.  Rules: - Write 2 to 3 short sentences. -  Write only the main 2 sentences. Do not include a greeting or a sign-off. Only say that their message has been received. Do not say it was forwarded to anyone, and do not mention any team or department. - Do not promise that anyone will contact them. - Write only the email body. No subject line, no placeholders like [Your Name],- Do not answer any questions or state any facts about the business (such as jobs, prices, or availability). Only thank them and confirm their message was received. - Always end with a new line containing only: The Team"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        592,
+        336
+      ],
+      "id": "9859c3cf-bf03-45d7-98e8-4253235f5f90",
+      "name": "Other Reply"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Append row in sheet').item.json.Email }}",
+        "subject": "Thanks for your interest!",
+        "emailType": "text",
+        "message": "=Hi {{ $('Append row in sheet').item.json['Name '] }},\n\n{{ $('Sales Reply').item.json.text }}\n\nThe Team",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        -320
+      ],
+      "id": "764de20c-9add-4fe3-beb0-652fdd687090",
+      "name": "Sales Reply1",
+      "webhookId": "a9041c32-9062-4e36-9755-7cb3b6dd533b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "F1ZdiBKBaQzF8gQ6",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Append row in sheet').item.json.Email }}",
+        "subject": "We've received your request",
+        "emailType": "text",
+        "message": "=Hi {{ $('Append row in sheet').item.json['Name '] }},\n\n{{ $('Support Reply').item.json.text }}\n\nThe Team",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        -16
+      ],
+      "id": "c06eb94c-e157-4369-a8e7-b941c28f2acf",
+      "name": "Support Reply1",
+      "webhookId": "db8cf4b2-e83d-40ca-97cd-f5b91660b82d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "F1ZdiBKBaQzF8gQ6",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Append row in sheet').item.json.Email }}",
+        "subject": "Thanks for reaching out",
+        "emailType": "text",
+        "message": "=Hi {{ $('Append row in sheet').item.json['Name '] }},\n\n{{ $('Other Reply').item.json.text }}\n\nThe Team",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        336
+      ],
+      "id": "38d1da00-dc9c-4e25-ab02-bf8881a53b42",
+      "name": "Other Reply1",
+      "webhookId": "47acca74-9dc7-493c-a4e8-2ec7c76808a6",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "F1ZdiBKBaQzF8gQ6",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama3.2:3b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        592,
+        -128
+      ],
+      "id": "b688a627-92bb-4f99-a91d-b7b98bf1e407",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "d74CkRuN3VjwzYRi",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama3.2:3b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        592,
+        192
+      ],
+      "id": "dbaf3a77-7425-459e-8b7d-befb1449ee49",
+      "name": "Ollama Chat Model1",
+      "credentials": {
+        "ollamaApi": {
+          "id": "d74CkRuN3VjwzYRi",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama3.2:3b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        592,
+        544
+      ],
+      "id": "503c6baf-d75a-482b-972c-a9c2eba43df4",
+      "name": "Ollama Chat Model2",
+      "credentials": {
+        "ollamaApi": {
+          "id": "d74CkRuN3VjwzYRi",
+          "name": "Ollama account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "Sales Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Support Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Other Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Support Reply": {
+      "main": [
+        [
+          {
+            "node": "Support Reply1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sales Reply": {
+      "main": [
+        [
+          {
+            "node": "Sales Reply1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Other Reply": {
+      "main": [
+        [
+          {
+            "node": "Other Reply1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Sales Reply",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Support Reply",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Other Reply",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a699f8bd-6baf-4e17-a15f-1dc089122a63",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1ecddca6e65f17cf0a20a3609013d903e3e8ab7215d7668d7489d35bc09562a5"
+  },
+  "nodeGroups": [],
+  "id": "maU5bsCfjsl28GjG",
+  "tags": []
+}
