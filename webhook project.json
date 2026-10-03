@@ -1,0 +1,290 @@
+{
+  "name": "webhook project",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "contact",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "fbffccb1-7b27-487c-9f24-51a5646b4020",
+      "name": "Webhook",
+      "webhookId": "8b878aa2-c700-47ad-b49b-241048389682"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"ok\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        192,
+        -112
+      ],
+      "id": "c47f118b-15c5-4a89-a29d-e9a27274bc2a",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Jpu9aILjuWEbpoCiiYfOy5VwLKb4TzFrydi_xGAZxqQ",
+          "mode": "list",
+          "cachedResultName": "Webhook",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Jpu9aILjuWEbpoCiiYfOy5VwLKb4TzFrydi_xGAZxqQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Jpu9aILjuWEbpoCiiYfOy5VwLKb4TzFrydi_xGAZxqQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.body.name }}",
+            "Email ": "={{ $json.body.email }}",
+            "Message": "={{ $json.body.message }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email ",
+              "displayName": "Email ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        192,
+        96
+      ],
+      "id": "24d02649-92f5-4672-ad9d-987d0ea1632e",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JkL3w6JWtusBdf0C",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook').item.json.body.email }}",
+        "subject": "Thank you for submitting the form.",
+        "emailType": "text",
+        "message": "=Hi , {{ $('Append row in sheet').item.json.Name }} {{ $json.text }}\n\nThe Team.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        784,
+        96
+      ],
+      "id": "faeb5fd5-e6b3-4534-b27d-75f9693013e2",
+      "name": "Send a message",
+      "webhookId": "bc634e5d-dd62-43fb-ae2e-64e5ca3ebcfc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "F1ZdiBKBaQzF8gQ6",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=you are a content writer for the company . your role is to reply to user messages  submitted through the website.keep the reply short , 3 to 4 lines only . reply to This user message : {{ $json.Message }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Dont greet or say hi ,keep the tone friendly, never promise a refund,never quote a price and never reply."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        480,
+        96
+      ],
+      "id": "dac1f03e-af67-4b1c-bce1-ed2c3b66a867",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "llama3.2:3b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmOllama",
+      "typeVersion": 1,
+      "position": [
+        480,
+        272
+      ],
+      "id": "e8228461-c265-421a-969e-e032360ea52f",
+      "name": "Ollama Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "d74CkRuN3VjwzYRi",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ahsanburki1819@gmail.com",
+        "subject": "=🔔 New lead: {{ $('Webhook').item.json.body.name }}",
+        "emailType": "text",
+        "message": "=New lead received!  Name: {{ $('Webhook').item.json.body.name }} Email: {{ $('Webhook').item.json.body.email }} Message: {{ $('Webhook').item.json.body.message }} Received at: {{ $now.toFormat('yyyy-MM-dd HH:mm') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        992,
+        96
+      ],
+      "id": "16f55eb8-edf3-4615-bf35-0cf1c1c0b959",
+      "name": "Send a message1",
+      "webhookId": "30d712a2-2314-4af2-8d0e-74225d104de5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "F1ZdiBKBaQzF8gQ6",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        []
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b373482b-2f6a-4295-92f9-5442c47d9aab",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1ecddca6e65f17cf0a20a3609013d903e3e8ab7215d7668d7489d35bc09562a5"
+  },
+  "nodeGroups": [],
+  "id": "xSBZi9EQ8Q2RiNv2",
+  "tags": []
+}
