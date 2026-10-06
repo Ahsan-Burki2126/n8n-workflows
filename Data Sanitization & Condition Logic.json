@@ -1,0 +1,312 @@
+{
+  "name": "Data Sanitization & Condition Logic",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "27f0b879-bb3a-441f-bb93-d34026189cfe",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -128,
+        -32
+      ],
+      "id": "61610907-3f21-4ac9-9af1-c5e187ecc4ae",
+      "name": "Webhook",
+      "webhookId": "27f0b879-bb3a-441f-bb93-d34026189cfe"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.body.email }}",
+        "subject": "Information regarding your inquiry",
+        "emailType": "text",
+        "message": "=Hi {{ $json.cleanName }}, thanks for reaching out. Based on your budget, here is a link to our automated self-service guide...",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        64
+      ],
+      "id": "8cc5e6e6-840b-473e-88aa-74873411399a",
+      "name": "Send a message to standard Lead",
+      "webhookId": "0fcf4052-f56b-409d-9fe3-b1668e3c8390",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "eYYkIexctuFeYnnR",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ahsanburki1819@gmail.com",
+        "subject": "High Ticket Lead Recieved !",
+        "emailType": "text",
+        "message": "=Name :   {{ $json.cleanName }}\nContact : {{ $json.cleanPhone }}\nBudget : {{ $json.body.budget }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        -128
+      ],
+      "id": "5d3feb92-6188-4199-9a2f-f7e9a0ebca22",
+      "name": "Send a Notification Message to the Team",
+      "webhookId": "5720787e-beac-493c-ad1a-fb504b389aff",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "eYYkIexctuFeYnnR",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Ge-OyUawoUxxS9-WJvcqugF-Wko4t33Uo5IYwIfGg_w",
+          "mode": "list",
+          "cachedResultName": "Sanitized and CLeaned Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Ge-OyUawoUxxS9-WJvcqugF-Wko4t33Uo5IYwIfGg_w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Ge-OyUawoUxxS9-WJvcqugF-Wko4t33Uo5IYwIfGg_w/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Webhook').item.json.body.name }}",
+            "Phone": "={{ $('Webhook').item.json.body.phone }}",
+            "Budget": "={{ $('Webhook').item.json.body.budget }}",
+            "Email": "={{ $('Webhook').item.json.body.email }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        864,
+        -32
+      ],
+      "id": "6d6534b2-76fc-4505-9b5c-0097aa82867b",
+      "name": "Appending Leads to CRM",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JkL3w6JWtusBdf0C",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.budget }}",
+                    "rightValue": 1000,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gt"
+                    },
+                    "id": "6f7688e3-9688-463d-a7cb-cccfb8dca77b"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "High Ticket"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "5afaaa81-7e57-4b09-a796-7113f01358d7",
+                    "leftValue": "={{ $json.body.budget }}",
+                    "rightValue": 1000,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lte"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Standard"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        304,
+        -32
+      ],
+      "id": "dc40c514-7517-404c-84d1-4569bdd8abe3",
+      "name": "Switch between standard and High Ticket Lead"
+    },
+    {
+      "parameters": {
+        "jsCode": "for (const item of $input.all()) {\n  // 1. Standardize Name\n  let rawName = item.json.body.name || item.json.name || \"\";\n  item.json.cleanName = rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase();\n  \n  // 2. Clean Phone\n  let rawPhone = item.json.body.phone || item.json.phone || \"\";\n  item.json.cleanPhone = rawPhone.replace(/\\D/g, '');\n\n  // 3. Clean Email\n  let rawEmail = item.json.body.email || item.json.email || \"\";\n  item.json.cleanEmail = rawEmail.trim().toLowerCase();\n}\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        96,
+        -32
+      ],
+      "id": "a99a2966-e647-487c-bf64-ce5d0eb4020d",
+      "name": "Clean the Data"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Clean the Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message to standard Lead": {
+      "main": [
+        [
+          {
+            "node": "Appending Leads to CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a Notification Message to the Team": {
+      "main": [
+        [
+          {
+            "node": "Appending Leads to CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch between standard and High Ticket Lead": {
+      "main": [
+        [
+          {
+            "node": "Send a Notification Message to the Team",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message to standard Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean the Data": {
+      "main": [
+        [
+          {
+            "node": "Switch between standard and High Ticket Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "bb27a7d5-2817-4e92-96fc-419730721fae",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1ecddca6e65f17cf0a20a3609013d903e3e8ab7215d7668d7489d35bc09562a5"
+  },
+  "nodeGroups": [],
+  "id": "lfabat2aBvYwonWv",
+  "tags": []
+}
