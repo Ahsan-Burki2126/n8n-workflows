@@ -1,0 +1,760 @@
+{
+  "name": "Advanced Proposal & CRM Logging",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "7ff77c1e-0a46-47bd-9742-b80f754aede4",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -384,
+        -96
+      ],
+      "id": "3ad129c1-b242-4adf-bb38-e6870aedb2ad",
+      "name": "Webhook",
+      "webhookId": "7ff77c1e-0a46-47bd-9742-b80f754aede4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "79b1c85b-3097-4352-ab09-a982eb6ca1ac",
+              "leftValue": "={{ $json.query.email }}",
+              "rightValue": "@",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "27395d83-e51d-4199-a9b5-b80d1c034172",
+              "leftValue": "={{ $json.query.budget }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -144,
+        -96
+      ],
+      "id": "144a848b-4afa-40ba-b675-65d08d1cbb7d",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "307dd37f-66bc-4684-8b9d-109fbce04d33",
+              "name": "basePrice",
+              "value": 2000,
+              "type": "number"
+            },
+            {
+              "id": "5a649f99-ef54-466f-a28d-f3d0fa833e7a",
+              "name": "extraPagesCost",
+              "value": "={{ Math.max(0,$json.query.pages - 5)*100}}",
+              "type": "number"
+            },
+            {
+              "id": "f0588ea1-6ca9-4273-b503-7dfb293eb61b",
+              "name": "paymentCost",
+              "value": "={{ $json.query.features.includes('paymentIntegration') ? 300 : 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "0ca0dd96-f739-420e-971a-1e096c5fef1a",
+              "name": "adminCost",
+              "value": "={{ $json.query.features.includes('adminDashboard') ? 500 : 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "baf31631-0bd4-4dfd-91d8-d42bedd88525",
+              "name": "authCost",
+              "value": "={{ $json.query.features.includes('userAuthentication') ? 250 : 0 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        80,
+        -240
+      ],
+      "id": "43304ee0-193c-43e0-aa59-4bb0383bca88",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6ba83f89-1bd7-4b45-8a83-b1930a3beb35",
+              "name": "totalPrice",
+              "value": "={{ $json.basePrice + $json.extraPagesCost +$json.paymentCost + $json.adminCost + $json.authCost}}",
+              "type": "number"
+            },
+            {
+              "id": "e648946f-41a4-4659-a872-0c3d6beee25a",
+              "name": "depositRequired",
+              "value": "={{ ($json.basePrice + $json.extraPagesCost + $json.paymentCost + $json.adminCost + $json.authCost) * 0.5 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        288,
+        -240
+      ],
+      "id": "87d15012-c9bf-4c7e-9beb-cd25065ba6dc",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1wOMCYRc9Hdj_LWuAqga2ISym6ursy3W1LYFhfxE2SjA",
+          "mode": "list",
+          "cachedResultName": "Burki Automates Sales Pipeline",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wOMCYRc9Hdj_LWuAqga2ISym6ursy3W1LYFhfxE2SjA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wOMCYRc9Hdj_LWuAqga2ISym6ursy3W1LYFhfxE2SjA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Company": "={{ $('Webhook').item.json.query.clientName }}",
+            "Email ": "={{ $('Webhook').item.json.query.email }}",
+            "Client Budget": "={{ $('Webhook').item.json.query.budget }}",
+            "Calculated Quote": "={{ $('Edit Fields1').item.json.totalPrice }}",
+            "Status": "Needs Review"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email ",
+              "displayName": "Email ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Budget",
+              "displayName": "Client Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Calculated Quote",
+              "displayName": "Calculated Quote",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        -80
+      ],
+      "id": "e20be1fe-6c9d-4d97-8c56-7e152b9617fa",
+      "name": "Not Qualified Leads Appends Row",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JkL3w6JWtusBdf0C",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1wOMCYRc9Hdj_LWuAqga2ISym6ursy3W1LYFhfxE2SjA",
+          "mode": "list",
+          "cachedResultName": "Burki Automates Sales Pipeline",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wOMCYRc9Hdj_LWuAqga2ISym6ursy3W1LYFhfxE2SjA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wOMCYRc9Hdj_LWuAqga2ISym6ursy3W1LYFhfxE2SjA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Company": "={{ $('Webhook').item.json.query.clientName }}",
+            "Email ": "={{ $('Webhook').item.json.query.email }}",
+            "Client Budget": "={{ $('Webhook').item.json.query.budget }}",
+            "Calculated Quote": "={{ $('Edit Fields1').item.json.totalPrice }}",
+            "Status": "Qualified"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email ",
+              "displayName": "Email ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Budget",
+              "displayName": "Client Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Calculated Quote",
+              "displayName": "Calculated Quote",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        -336
+      ],
+      "id": "fb38b112-4757-4df7-b606-9a626e1b89e5",
+      "name": "Qualified Leads Appends Row",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JkL3w6JWtusBdf0C",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('If').item.json.query.budget }}",
+                    "rightValue": "={{ $json.totalPrice }}",
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    },
+                    "id": "ede43eee-8020-4854-a3a3-bd2a9601cc66"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Within Clientsa Budget"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "2dd1cf4a-dd42-444f-8054-641dd7ba51b8",
+                    "leftValue": "={{ $('If').item.json.query.budget }}",
+                    "rightValue": "={{ $json.totalPrice }}",
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Over Clients Budget"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        512,
+        -240
+      ],
+      "id": "f31a0cd4-38f4-4c98-adb7-4d7bc29eb686",
+      "name": "Differ between qualified&notQualified"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "replaceAll",
+              "text": "[clientName]",
+              "replaceText": "={{ $('Webhook').item.json.query.clientName }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[contactPerson]",
+              "replaceText": "={{ $('Webhook').item.json.query.contactPerson }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[projectType]",
+              "replaceText": "={{ $('Webhook').item.json.query.projectType }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[totalPrice]",
+              "replaceText": "={{ $('Edit Fields1').item.json.totalPrice.toString() }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[depositRequired]",
+              "replaceText": "={{ $('Edit Fields1').item.json.depositRequired.toString() }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "Total minus deposit",
+              "replaceText": "={{ ($('Edit Fields1').item.json.totalPrice - $('Edit Fields1').item.json.depositRequired).toString()}}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        -336
+      ],
+      "id": "def7075d-94b2-4b7f-ba54-e292a965e1c7",
+      "name": "Update a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "F0KpYTJ57LL7PwzS",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "1pFmMAYUg2fB854YoYIrj6IcgITFGl8u1q1cWikl5b30",
+          "mode": "list",
+          "cachedResultName": "Burki Automates Master Proposal",
+          "cachedResultUrl": "https://docs.google.com/document/d/1pFmMAYUg2fB854YoYIrj6IcgITFGl8u1q1cWikl5b30/edit?usp=drivesdk"
+        },
+        "name": "={{ $('Webhook').item.json.query.clientName }} - Web Development Proposal",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        992,
+        -336
+      ],
+      "id": "8179b22e-3146-43cd-9de7-e65c05efef20",
+      "name": "Copy file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "cMQSImXbSgftxNxT",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook').item.json.query.email }}",
+        "subject": "=Proposal for {{ $('Webhook').item.json.query.projectType }} - Burki Automates",
+        "emailType": "text",
+        "message": "=Hi {{ $('Webhook').item.json.query.contactPerson }},  Thank you for reaching out regarding your {{ $('Webhook').item.json.query.projectType }}.  Our team has reviewed your requirements, and we have put together a detailed proposal and timeline for your project. You can view your customized proposal document here:  https://docs.google.com/document/d/{{ $json.documentId }}/view  Please review the scope of work and the investment details. If everything looks good, simply reply to this email with \"Approved\" and we will send over the invoice for the deposit to get started.  Best regards, Ahsan Burki Burki Automates",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1424,
+        -336
+      ],
+      "id": "29b821e5-59c8-40f8-8603-2c726e340920",
+      "name": "Send a message",
+      "webhookId": "5c52d35b-f15e-4493-99b2-0580e5eb17a9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "F1ZdiBKBaQzF8gQ6",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1wOMCYRc9Hdj_LWuAqga2ISym6ursy3W1LYFhfxE2SjA",
+          "mode": "list",
+          "cachedResultName": "Burki Automates Sales Pipeline",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wOMCYRc9Hdj_LWuAqga2ISym6ursy3W1LYFhfxE2SjA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wOMCYRc9Hdj_LWuAqga2ISym6ursy3W1LYFhfxE2SjA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email ": "={{ $('Webhook').item.json.query.email }}",
+            "Status": "Proposal Sent",
+            "Proposal Link": "=[https://docs.google.com/document/d/](https://docs.google.com/document/d/){{ $('Copy file').item.json.id }}/view",
+            "Date Sent": "={{ $now.toFormat('yyyy-MM-dd') }}"
+          },
+          "matchingColumns": [
+            "Email "
+          ],
+          "schema": [
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email ",
+              "displayName": "Email ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Client Budget",
+              "displayName": "Client Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Calculated Quote",
+              "displayName": "Calculated Quote",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Proposal Link",
+              "displayName": "Proposal Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Date Sent",
+              "displayName": "Date Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1648,
+        -336
+      ],
+      "id": "31cdae93-2784-4b7f-a909-1624718bdc7f",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JkL3w6JWtusBdf0C",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Differ between qualified&notQualified",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Differ between qualified&notQualified": {
+      "main": [
+        [
+          {
+            "node": "Qualified Leads Appends Row",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Not Qualified Leads Appends Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qualified Leads Appends Row": {
+      "main": [
+        [
+          {
+            "node": "Copy file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copy file": {
+      "main": [
+        [
+          {
+            "node": "Update a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a document": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b728be80-d51b-4a75-97c3-a2cbbb087139",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1ecddca6e65f17cf0a20a3609013d903e3e8ab7215d7668d7489d35bc09562a5"
+  },
+  "nodeGroups": [],
+  "id": "lhYGFYnCnM22yzgu",
+  "tags": []
+}
